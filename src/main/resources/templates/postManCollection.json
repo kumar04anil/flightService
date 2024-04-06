@@ -1,0 +1,23 @@
+curl --location 'http://localhost:8181/comflightds/airline' \
+--header 'Content-Type: application/json' \
+--data '{
+"destination": "INDIA",
+"source": "JAPAN",
+"flightNumber": "FLIGHT222",
+"flightDuration": "2 hrs",
+"flightDate": "2024-04-06",
+"flightTime": "2024-04-06T10:15:30+01:00",
+"countryCode": "INDIA",
+"fare": {
+"currency": "INR",
+"fare": 8795.75
+},
+"flightInfo": {
+"flightNumber": "FLIGHT222",
+"flightType": "INTERNATIONAL",
+"numberOfSeats": 150,
+"flightStatus": "RUNNING"
+}
+}'
+
+curl --location 'http://localhost:8181/comflightds/airline/FLIGHT222'
