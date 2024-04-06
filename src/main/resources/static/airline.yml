@@ -1,0 +1,219 @@
+openapi: "3.0.2"
+info:
+  title: API Customer
+  version: "1.0"
+servers:
+  - url: https://localhost:8080
+tags:
+  - name: FlightService
+    description: Flight specific data.
+paths:
+  /airline:
+    post:
+      tags:
+        - Airline
+      summary: Add new AirLine
+      operationId: addNewAirLine
+      requestBody:
+        description: FlightObject for add new Flight.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlightDataDto'
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/FlightFullResponseDataDto'
+        '404':
+          description: NOT FOUND
+  /airline/{flightNumber}:
+    get:
+      tags:
+        - Flight Mapping
+      description: This api is used to fetch flight details by flight number
+      operationId: getFlightMappingForFlightNumber
+      parameters:
+        - examples:
+            flight_number_ok_response:
+              value: 'FLIGHT222'
+            validation_error-response:
+              value: 'FLIGHT000'
+          explode: false
+          in: path
+          name: flightNumber
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: OK
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/FlightListDataDto'
+        '400':
+          description: Bad Request
+          content:
+            'application/json':
+              examples:
+                validation_error-response:
+                  $ref: '#/components/examples/validation_error_response'
+                  value: null
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDataDto'
+      summary: This API will be used to fetch flight details by Flight Number
+
+components:
+  schemas:
+    FlightDataDto:
+      required:
+        - destination
+        - flightNumber
+        - source
+        - duration
+        - flightDate
+        - flightTime
+        - fare
+        - flightInfo
+      type: object
+      properties:
+        destination:
+          $ref: '#/components/schemas/CountryCodeDataDto'
+        source:
+          $ref: '#/components/schemas/CountryCodeDataDto'
+        flightNumber:
+          type: string
+          description: unique flight number.
+          example: 'FLIGHT222'
+        duration:
+          type: string
+          description: flight timeTravel.
+          example: '2 hrs'
+        flightDate:
+          type: string
+          format: date
+          description: flight Date
+          example: '2024-12-03'
+        flightTime:
+          type: string
+          format: date-time
+          description: flight time
+          example: '13:30:00'
+        fare:
+          $ref: '#/components/schemas/FareDataDto'
+        flightInfo:
+          $ref: '#/components/schemas/FlightInfoDataDto'
+
+    FareDataDto:
+      required:
+        - currency
+        - fare
+      type: object
+      properties:
+        currency:
+          type: string
+          description: country currency
+          example: 'INR'
+        fare:
+          type: number
+          format: double
+          description: price per passenger in flight
+          example: '50324.44'
+    FlightInfoDataDto:
+      required:
+        - flightType
+        - numberOfSeats
+      type: object
+      properties:
+        flightType:
+          type: string
+          description: Type of flight
+          example: 'commercial'
+        numberOfSeats:
+          type: integer
+          format: int32
+          description: available seats in flight.
+          example: 200
+        FlightStatus:
+          $ref: '#/components/schemas/FlightStatusDataDto'
+    FlightListDataDto:
+      description: AccountListObj
+      type: object
+      properties:
+        flightList:
+          items:
+            $ref: '#/components/schemas/FlightDataDto'
+          type: array
+        status:
+          type: string
+          description: 'flight status running or closed'
+          example: 'RUNNING'
+    CountryCodeDataDto:
+      description: 'country code for flight source and destination'
+      enum:
+        - INDIA
+        - JAPAN
+        - AUS
+        - AMERICA
+        - DUBAI
+        - UK
+    FlightStatusDataDto:
+      description: 'status of flight'
+      enum:
+        - RUNNING
+        - CLOSED
+        - HOLD
+        - COMING_SOON
+    FlightFullResponseDataDto:
+      type: object
+      properties:
+        flight:
+          $ref: '#/components/schemas/FlightDataDto'
+
+    ErrorResponseDataDto:
+      description: ""
+      properties:
+        timestamp:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+        detail:
+          type: string
+        instance:
+          type: string
+        code:
+          type: string
+        title:
+          type: string
+        subDetails:
+          description: A list of validations tat exist with the request.
+          items:
+            $ref: '#/components/schemas/ErrorResponse_subDetails_inner'
+          type: array
+      type: object
+    ErrorResponse_subDetails_inner:
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      type: object
+  examples:
+    validation_error_response:
+      value:
+        timestamp: 2024-03-13T09:51:38.619668067Z
+        type: flightds/bad-request
+        title: Bad Request
+        status: "400"
+        detail: validation errors.
+        instce: flight/6666839eb-bfc5-4950-9a8c-5d56088b3017
+        code: flightda-abc-101
+        subDetails:
+          - code: id/invalid
+            message: id must be alphanumeric.
